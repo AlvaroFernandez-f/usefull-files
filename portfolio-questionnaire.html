@@ -1,0 +1,355 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Cuestionario para crear un portfolio personal interactivo.">
+  <title>Brief de portfolio | Tu historia, bien contada</title>
+  <style>
+    :root {
+      --ink: #1d2421;
+      --muted: #69736d;
+      --paper: #f5f3ee;
+      --panel: #fffdf8;
+      --line: #d9ddd5;
+      --accent: #e15f3d;
+      --accent-dark: #a83c27;
+      --lime: #d9ef8c;
+      --blue: #b9dcdf;
+      --shadow: 0 18px 50px rgba(29, 36, 33, .08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Georgia, 'Times New Roman', serif;
+      line-height: 1.5;
+    }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .topbar {
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 22px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      font-family: Arial, sans-serif;
+      font-size: .78rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .mark { font-weight: 800; }
+    .status { color: var(--muted); }
+    .status strong { color: var(--accent-dark); }
+    .hero {
+      width: min(1180px, calc(100% - 40px));
+      margin: 30px auto 68px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(260px, .8fr);
+      gap: 70px;
+      align-items: end;
+    }
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 7px 11px;
+      background: var(--lime);
+      font: 700 .72rem Arial, sans-serif;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 760px;
+      margin: 0;
+      font-size: clamp(3.5rem, 9vw, 7.5rem);
+      line-height: .88;
+      font-weight: 400;
+      letter-spacing: -.06em;
+    }
+    .hero-copy {
+      margin: 26px 0 0;
+      max-width: 590px;
+      color: #4c5650;
+      font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+    }
+    .hero-note {
+      border-top: 2px solid var(--ink);
+      padding-top: 16px;
+      font-size: 1.08rem;
+    }
+    .hero-note b { color: var(--accent-dark); }
+    main { width: min(1180px, calc(100% - 40px)); margin: 0 auto 80px; }
+    .progress-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 13px 0 14px;
+      background: rgba(245,243,238,.92);
+      backdrop-filter: blur(10px);
+      font-family: Arial, sans-serif;
+    }
+    .progress-meta { display: flex; justify-content: space-between; font-size: .74rem; text-transform: uppercase; letter-spacing: .08em; }
+    .progress-track { height: 7px; margin-top: 8px; background: var(--line); }
+    .progress-fill { width: 0; height: 100%; background: var(--accent); transition: width .35s ease; }
+    .section {
+      margin: 28px 0 54px;
+      padding: 34px clamp(20px, 5vw, 62px) 42px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .section-heading { display: grid; grid-template-columns: 70px 1fr; gap: 22px; margin-bottom: 34px; }
+    .section-number { color: var(--accent); font: 700 1.25rem Arial, sans-serif; }
+    h2 { margin: 0; font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: 400; letter-spacing: -.035em; }
+    .section-intro { margin: 7px 0 0; color: var(--muted); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 25px 30px; }
+    .full { grid-column: 1 / -1; }
+    label, legend { display: block; margin-bottom: 8px; font: 700 .78rem Arial, sans-serif; letter-spacing: .055em; text-transform: uppercase; }
+    .hint { display: block; margin: -3px 0 9px; color: var(--muted); font-size: .9rem; }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid #c6cdc5;
+      border-radius: 0;
+      padding: 13px 14px;
+      color: var(--ink);
+      background: #fff;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(225,95,61,.15); }
+    textarea { min-height: 120px; resize: vertical; }
+    .tall { min-height: 170px; }
+    fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+    .check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .check { display: flex; align-items: flex-start; gap: 9px; padding: 10px; border: 1px solid var(--line); background: #fff; font: 400 .95rem Georgia, serif; letter-spacing: 0; text-transform: none; }
+    .check input { width: auto; margin-top: 4px; accent-color: var(--accent); }
+    .project { padding: 22px 0; border-top: 1px solid var(--line); }
+    .project:first-of-type { border-top: 0; padding-top: 0; }
+    .project-title { display: flex; justify-content: space-between; gap: 15px; align-items: baseline; }
+    .project-title h3 { margin: 0 0 18px; font-size: 1.35rem; font-weight: 400; }
+    .project-badge { color: var(--accent-dark); font: 700 .7rem Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+    .add-project { margin-top: 20px; border: 1px dashed var(--accent); color: var(--accent-dark); background: transparent; padding: 11px 15px; font: 700 .78rem Arial, sans-serif; letter-spacing: .04em; }
+    .remove-project { border: 0; color: var(--muted); background: transparent; font: .85rem Arial, sans-serif; }
+    .remove-project:hover { color: var(--accent-dark); }
+    .actions { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 28px 0; }
+    .actions p { margin: 0; color: var(--muted); font-size: .95rem; }
+    .primary { border: 0; padding: 16px 23px; color: #fff; background: var(--ink); font: 700 .78rem Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; transition: transform .2s, background .2s; }
+    .primary:hover { background: var(--accent); transform: translateY(-2px); }
+    .message { display: none; margin-top: 15px; padding: 15px; border-left: 4px solid var(--accent); background: var(--lime); font-family: Arial, sans-serif; font-size: .9rem; }
+    .message.visible { display: block; }
+    footer { width: min(1180px, calc(100% - 40px)); margin: 0 auto 35px; color: var(--muted); font: .75rem Arial, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+    @media (max-width: 720px) {
+      .topbar, .hero, main, footer { width: min(100% - 28px, 1180px); }
+      .hero { display: block; margin-top: 24px; margin-bottom: 45px; }
+      .hero-note { margin-top: 38px; }
+      .section-heading { grid-template-columns: 42px 1fr; gap: 10px; }
+      .grid { grid-template-columns: 1fr; }
+      .full { grid-column: auto; }
+      .check-grid { grid-template-columns: 1fr; }
+      .section { padding: 26px 18px 30px; }
+      .actions { align-items: stretch; flex-direction: column; }
+      .primary { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <span class="mark">Portfolio / Brief 01</span>
+    <span class="status"><strong id="answered">0%</strong> completado</span>
+  </header>
+
+  <section class="hero">
+    <div>
+      <span class="eyebrow">Cuestionario de dirección creativa</span>
+      <h1>Cuéntame<br>tu trabajo.</h1>
+      <p class="hero-copy">Este formulario reúne el material que necesito para convertir tu experiencia en un portfolio con personalidad, claridad y pruebas reales de lo que sabes hacer.</p>
+    </div>
+    <p class="hero-note"><b>Tiempo estimado:</b> 15–25 min.<br>Escribe con naturalidad. Las respuestas imperfectas suelen ser las más útiles.</p>
+  </section>
+
+  <main>
+    <div class="progress-wrap" aria-label="Progreso del cuestionario">
+      <div class="progress-meta"><span>Tu mapa de portfolio</span><span id="progressText">0 de 7 secciones</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <form id="portfolioForm">
+      <section class="section" data-section>
+        <div class="section-heading"><span class="section-number">01</span><div><h2>Tu punto de partida</h2><p class="section-intro">La información básica que dará contexto a todo lo demás.</p></div></div>
+        <div class="grid">
+          <div><label for="name">Nombre que quieres mostrar *</label><input id="name" name="name" required placeholder="Tu nombre o nombre profesional"></div>
+          <div><label for="role">Profesión / titular *</label><input id="role" name="role" required placeholder="Diseñadora de producto, fotógrafo..." ></div>
+          <div><label for="location">Ubicación</label><input id="location" name="location" placeholder="Ciudad, país o 'remoto'"></div>
+          <div><label for="email">Email de contacto *</label><input id="email" name="email" type="email" required placeholder="hola@tudominio.com"></div>
+          <div class="full"><label for="bio">Descríbete en 3–5 frases *</label><span class="hint">Qué haces, para quién y qué te importa de tu trabajo.</span><textarea id="bio" name="bio" required></textarea></div>
+          <div class="full"><label for="statement">¿Qué te gustaría que alguien recordara de ti?</label><textarea id="statement" name="statement" placeholder="Una idea, una convicción o una frase que te represente..."></textarea></div>
+        </div>
+      </section>
+
+      <section class="section" data-section>
+        <div class="section-heading"><span class="section-number">02</span><div><h2>Tu audiencia</h2><p class="section-intro">Un portfolio eficaz habla a alguien concreto.</p></div></div>
+        <div class="grid">
+          <div class="full"><label for="audience">¿Quién quieres que visite tu portfolio? *</label><textarea id="audience" name="audience" required placeholder="Clientes, estudios, recruiters, colaboradores... ¿Qué tipo de persona es?"></textarea></div>
+          <div><label for="opportunity">¿Qué quieres conseguir con él? *</label><textarea id="opportunity" name="opportunity" required placeholder="Conseguir clientes, cambiar de trabajo, vender servicios..."></textarea></div>
+          <div><label for="feeling">¿Cómo quieres que se sienta al visitarlo?</label><textarea id="feeling" name="feeling" placeholder="Confianza, curiosidad, ganas de hablar contigo..."></textarea></div>
+          <div class="full"><label for="references">¿Qué portfolios o webs te gustan?</label><span class="hint">Añade URLs y explica qué te atrae de cada una: tipografía, tono, movimiento, estructura...</span><textarea id="references" name="references"></textarea></div>
+        </div>
+      </section>
+
+      <section class="section" data-section>
+        <div class="section-heading"><span class="section-number">03</span><div><h2>Tus capacidades</h2><p class="section-intro">No solo qué herramientas manejas, también cómo piensas.</p></div></div>
+        <div class="grid">
+          <div class="full"><label for="skills">Tus habilidades principales *</label><span class="hint">Ordénalas por importancia. Incluye técnicas y humanas.</span><textarea id="skills" name="skills" required placeholder="Dirección de arte, React, investigación, edición de vídeo, liderazgo..."></textarea></div>
+          <fieldset class="full"><legend>¿Qué tipo de trabajo haces?</legend><div class="check-grid">
+            <label class="check"><input type="checkbox" name="workTypes" value="Estrategia e investigación"> Estrategia e investigación</label>
+            <label class="check"><input type="checkbox" name="workTypes" value="Diseño visual"> Diseño visual</label>
+            <label class="check"><input type="checkbox" name="workTypes" value="Producto / UX"> Producto / UX</label>
+            <label class="check"><input type="checkbox" name="workTypes" value="Desarrollo"> Desarrollo</label>
+            <label class="check"><input type="checkbox" name="workTypes" value="Contenido / escritura"> Contenido / escritura</label>
+            <label class="check"><input type="checkbox" name="workTypes" value="Foto / vídeo / 3D"> Foto / vídeo / 3D</label>
+            <label class="check"><input type="checkbox" name="workTypes" value="Dirección / gestión"> Dirección / gestión</label>
+            <label class="check"><input type="checkbox" name="workTypes" value="Otro"> Otro</label>
+          </div></fieldset>
+          <div><label for="process">¿Cómo trabajas?</label><textarea id="process" name="process" placeholder="Tu proceso, herramientas, forma de colaborar..."></textarea></div>
+          <div><label for="difference">¿Qué haces especialmente bien?</label><textarea id="difference" name="difference" placeholder="Ese punto fuerte que tus clientes o compañeros suelen mencionar."></textarea></div>
+        </div>
+      </section>
+
+      <section class="section" data-section>
+        <div class="section-heading"><span class="section-number">04</span><div><h2>Tus proyectos</h2><p class="section-intro">Añade hasta cuatro trabajos. La historia y el resultado importan más que el listado.</p></div></div>
+        <div id="projects">
+          <article class="project">
+            <div class="project-title"><h3>Proyecto 01</h3><span class="project-badge">Imprescindible</span></div>
+            <div class="grid">
+              <div><label>Nombre del proyecto *</label><input name="project_1_name" required placeholder="Nombre del proyecto"></div>
+              <div><label>URL o carpeta de imágenes</label><input name="project_1_url" placeholder="https://..."></div>
+              <div class="full"><label>¿Qué problema u objetivo había? *</label><textarea name="project_1_problem" required></textarea></div>
+              <div><label>¿Qué hiciste tú exactamente? *</label><textarea name="project_1_role" required></textarea></div>
+              <div><label>¿Cuál fue el resultado?</label><textarea name="project_1_result" placeholder="Datos, impacto, aprendizaje o reacción..."></textarea></div>
+              <div class="full"><label>¿Qué imágenes, vídeos o archivos tienes?</label><textarea name="project_1_assets" placeholder="Logo, capturas, proceso, mockups, enlace a vídeo..."></textarea></div>
+            </div>
+          </article>
+        </div>
+        <button type="button" class="add-project" id="addProject">+ Añadir otro proyecto</button>
+      </section>
+
+      <section class="section" data-section>
+        <div class="section-heading"><span class="section-number">05</span><div><h2>Tu recorrido</h2><p class="section-intro">Los hitos que hacen que tu experiencia tenga forma.</p></div></div>
+        <div class="grid">
+          <div class="full"><label for="experience">Experiencia profesional</label><span class="hint">Empresa / cliente, cargo, fechas y una línea sobre lo que hiciste.</span><textarea id="experience" name="experience" class="tall"></textarea></div>
+          <div><label for="education">Formación</label><textarea id="education" name="education"></textarea></div>
+          <div><label for="awards">Premios, publicaciones o reconocimientos</label><textarea id="awards" name="awards"></textarea></div>
+          <div><label for="community">Charlas, comunidad o colaboraciones</label><textarea id="community" name="community"></textarea></div>
+          <div><label for="availability">Disponibilidad actual</label><textarea id="availability" name="availability" placeholder="Disponible para proyectos, buscando empleo, abierto a colaboraciones..."></textarea></div>
+        </div>
+      </section>
+
+      <section class="section" data-section>
+        <div class="section-heading"><span class="section-number">06</span><div><h2>La dirección visual</h2><p class="section-intro">Estas pistas ayudarán a construir una experiencia que se parezca a ti.</p></div></div>
+        <div class="grid">
+          <div><label for="visualWords">Tres a cinco palabras visuales</label><input id="visualWords" name="visualWords" placeholder="Preciso, cálido, editorial, experimental..."></div>
+          <div><label for="colors">Colores que te gustan o quieres evitar</label><input id="colors" name="colors"></div>
+          <div><label for="tone">¿Qué tono debe tener el texto?</label><select id="tone" name="tone"><option value="">Selecciona uno</option><option>Claro y directo</option><option>Cercano y humano</option><option>Elegante y editorial</option><option>Juguetón y atrevido</option><option>Técnico y preciso</option><option>Otro</option></select></div>
+          <div><label for="motion">¿Cuánto movimiento quieres?</label><select id="motion" name="motion"><option value="">Selecciona uno</option><option>Sereno: casi nada</option><option>Sutil: detalles con intención</option><option>Expresivo: quiero interacción</option><option>Experimental: sorpréndeme</option></select></div>
+          <div class="full"><label for="avoid">¿Hay algo que no quieras ver?</label><textarea id="avoid" name="avoid" placeholder="Estilos, frases, colores, efectos, estructuras o referencias que no te representan..."></textarea></div>
+        </div>
+      </section>
+
+      <section class="section" data-section>
+        <div class="section-heading"><span class="section-number">07</span><div><h2>Los últimos detalles</h2><p class="section-intro">Información práctica para que el resultado pueda salir al mundo.</p></div></div>
+        <div class="grid">
+          <div><label for="links">Enlaces que deben aparecer</label><textarea id="links" name="links" placeholder="LinkedIn, GitHub, Behance, Instagram, Calendly..."></textarea></div>
+          <div><label for="socialProof">Testimonios o frases de otras personas</label><textarea id="socialProof" name="socialProof"></textarea></div>
+          <div><label for="domain">¿Tienes dominio o alojamiento?</label><input id="domain" name="domain" placeholder="tudominio.com / todavía no"></div>
+          <div><label for="language">Idioma(s) del portfolio</label><input id="language" name="language" placeholder="Español, inglés... "></div>
+          <div class="full"><label for="extra">¿Qué más debería saber?</label><textarea id="extra" name="extra" class="tall" placeholder="Una restricción, una ambición o cualquier cosa que no haya preguntado."></textarea></div>
+        </div>
+      </section>
+
+      <div class="actions">
+        <p>Tu información se queda en tu dispositivo.<br>Descargarás un archivo JSON para compartirlo.</p>
+        <button class="primary" type="submit">Generar mi brief ↗</button>
+      </div>
+      <div class="message" id="message" role="status"></div>
+    </form>
+  </main>
+  <footer>Brief de portfolio · Hecho para pensar con claridad</footer>
+
+  <script>
+    const form = document.getElementById('portfolioForm');
+    const sections = [...document.querySelectorAll('[data-section]')];
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const answered = document.getElementById('answered');
+    const projects = document.getElementById('projects');
+    const addProject = document.getElementById('addProject');
+    const message = document.getElementById('message');
+    let projectCount = 1;
+
+    function updateProgress() {
+      const requiredFields = [...form.querySelectorAll('[required]')];
+      const completed = requiredFields.filter(field => field.value.trim()).length;
+      const percentage = requiredFields.length ? Math.round((completed / requiredFields.length) * 100) : 0;
+      const completedSections = sections.filter(section => [...section.querySelectorAll('input, textarea, select')].some(field => field.value.trim() || (field.type === 'checkbox' && field.checked))).length;
+      progressFill.style.width = percentage + '%';
+      answered.textContent = percentage + '%';
+      progressText.textContent = completedSections + ' de ' + sections.length + ' secciones';
+    }
+
+    form.addEventListener('input', updateProgress);
+    form.addEventListener('change', updateProgress);
+
+    addProject.addEventListener('click', () => {
+      if (projectCount >= 4) return;
+      projectCount += 1;
+      const article = document.createElement('article');
+      article.className = 'project';
+      article.innerHTML = `
+        <div class="project-title"><h3>Proyecto ${String(projectCount).padStart(2, '0')}</h3><button type="button" class="remove-project">Eliminar proyecto</button></div>
+        <div class="grid">
+          <div><label>Nombre del proyecto</label><input name="project_${projectCount}_name" placeholder="Nombre del proyecto"></div>
+          <div><label>URL o carpeta de imágenes</label><input name="project_${projectCount}_url" placeholder="https://..."></div>
+          <div class="full"><label>¿Qué problema u objetivo había?</label><textarea name="project_${projectCount}_problem"></textarea></div>
+          <div><label>¿Qué hiciste tú exactamente?</label><textarea name="project_${projectCount}_role"></textarea></div>
+          <div><label>¿Cuál fue el resultado?</label><textarea name="project_${projectCount}_result"></textarea></div>
+          <div class="full"><label>¿Qué imágenes, vídeos o archivos tienes?</label><textarea name="project_${projectCount}_assets"></textarea></div>
+        </div>`;
+      projects.appendChild(article);
+      article.querySelector('.remove-project').addEventListener('click', () => { article.remove(); projectCount -= 1; updateProgress(); });
+      if (projectCount === 4) addProject.style.display = 'none';
+    });
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const data = { generatedAt: new Date().toISOString(), questionnaire: 'Portfolio Brief 01', answers: {} };
+      [...form.elements].forEach(field => {
+        if (!field.name) return;
+        if (field.type === 'checkbox') {
+          if (!data.answers[field.name]) data.answers[field.name] = [];
+          if (field.checked) data.answers[field.name].push(field.value);
+        } else {
+          data.answers[field.name] = field.value.trim();
+        }
+      });
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `portfolio-brief-${(data.answers.name || 'respuestas').toLowerCase().replace(/[^a-z0-9áéíóúñ]+/gi, '-').replace(/^-|-$/g, '')}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      message.textContent = 'Listo. El archivo JSON se ha descargado. Entrégamelo tal cual para que pueda usarlo como base de tu portfolio.';
+      message.classList.add('visible');
+      message.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    updateProgress();
+  </script>
+</body>
+</html>
