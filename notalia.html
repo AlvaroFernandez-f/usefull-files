@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notalia · Gestor de notas</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 35 35'%3E%3Crect width='35' height='35' rx='11' fill='%23ff8f72'/%3E%3Cpath d='M10 25V10h3.6l7.4 9.4V10H25v15h-3.6L14 15.6V25z' fill='%2314211f' transform='rotate(-7 17.5 17.5)'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #14211f;
+      --muted: #6f7d79;
+      --paper: #f7f8f3;
+      --white: #ffffff;
+      --line: #e4e9e3;
+      --mint: #d5f0df;
+      --mint-deep: #2d7c58;
+      --coral: #ff8f72;
+      --coral-deep: #b7553e;
+      --sun: #f4d76d;
+      --blue: #cfe6f6;
+      --shadow: 0 18px 50px rgba(31, 54, 46, .08);
+      --radius: 18px;
+      --font: ui-rounded, "Avenir Next", "Trebuchet MS", sans-serif;
+        --cursor: none;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--paper); }
+    html { scrollbar-width: thin; scrollbar-color: var(--mint-deep) var(--paper); }
+    html::-webkit-scrollbar { width: 11px; }
+    html::-webkit-scrollbar-track { background: var(--paper); }
+    html::-webkit-scrollbar-thumb { border: 3px solid var(--paper); border-radius: 999px; background: var(--mint-deep); }
+    html::-webkit-scrollbar-thumb:hover { background: var(--ink); }
+    body { margin: 0; color: var(--ink); background: var(--paper); font-family: var(--font); cursor: none; }
+    button, input, select, .button, .close-modal, .card-menu { cursor: none; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .app-shell { min-height: 100vh; }
+    .topbar { height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 4vw; border-bottom: 1px solid var(--line); background: rgba(255,255,255,.82); backdrop-filter: blur(14px); position: sticky; top: 0; z-index: 10; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: -.04em; font-size: 1.25rem; }
+    .brand-mark { width: 35px; height: 35px; display: grid; place-items: center; font-weight: 900; }
+    .brand-mark svg { width: 35px; height: 35px; }
+    .top-actions { display: flex; align-items: center; gap: 12px; }
+    .user-chip { display: flex; align-items: center; gap: 8px; padding: 5px 7px 5px 9px; border: 0; border-radius: 999px; color: var(--muted); background: transparent; font-size: .86rem; font-weight: 700; cursor: none !important; transition: background .2s ease, box-shadow .2s ease, transform .2s ease; }
+    .user-chip:hover, .user-chip:focus-visible { background: rgba(213,240,223,.72); box-shadow: 0 7px 18px rgba(31,54,46,.14); transform: translateY(-1px); outline: none; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); background: var(--sun); }
+    .main { max-width: 1280px; margin: 0 auto; padding: 42px 4vw 70px; }
+    .dashboard-section { margin-top: 36px; }
+    .section-kicker { display: flex; align-items: center; gap: 9px; color: var(--mint-deep); font-size: .73rem; text-transform: uppercase; letter-spacing: .16em; font-weight: 900; margin-bottom: 9px; }
+    .section-kicker::before { content: ''; width: 18px; height: 3px; border-radius: 4px; background: var(--coral); }
+    .hero { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 34px; }
+    .hero-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; justify-content: flex-end; }
+    .eyebrow { color: var(--mint-deep); font-size: .73rem; text-transform: uppercase; letter-spacing: .16em; font-weight: 900; margin: 0 0 10px; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(2.15rem, 5vw, 4.5rem); line-height: .94; letter-spacing: -.075em; margin-bottom: 14px; max-width: 650px; }
+    h2 { font-size: 1.3rem; letter-spacing: -.04em; margin-bottom: 6px; }
+    h3 { font-size: 1rem; letter-spacing: -.025em; margin-bottom: 5px; }
+    .hero-copy { color: var(--muted); margin: 0; max-width: 520px; line-height: 1.5; }
+    .button { border: 0; border-radius: 12px; min-height: 43px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; transition: transform .2s, box-shadow .2s, background .2s; }
+    .button:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(31,54,46,.12); }
+    .button.primary { color: #fff; background: var(--ink); }
+    .button.accent { color: var(--ink); background: var(--coral); }
+    .button.soft { color: var(--mint-deep); background: var(--mint); }
+    .button.ghost { color: var(--muted); background: transparent; border: 1px solid var(--line); }
+    .button.danger { color: var(--coral-deep); background: #fff0ed; }
+    .button.small { min-height: 34px; padding: 0 11px; border-radius: 9px; font-size: .79rem; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; margin-bottom: 34px; }
+    .stat { background: var(--white); border: 1px solid var(--line); padding: 19px; border-radius: var(--radius); box-shadow: 0 8px 28px rgba(31,54,46,.03); position: relative; overflow: hidden; }
+    .stat:nth-child(1) { background: var(--mint); }
+    .stat:nth-child(2) { background: var(--blue); }
+    .stat:nth-child(3) { background: #fff1bd; }
+    .stat:nth-child(4) { background: #ffe0d7; }
+    .stat-label { color: var(--muted); font-size: .76rem; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; }
+    .stat-value { font-size: 2.15rem; letter-spacing: -.07em; font-weight: 900; margin-top: 8px; }
+    .stat-note { color: var(--muted); font-size: .76rem; margin-top: 3px; }
+    .averages-panel { display: grid; grid-template-columns: 1.15fr .85fr; gap: 15px; margin-bottom: 34px; }
+    .average-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+    .average-card h2 { margin-bottom: 4px; }
+    .average-card-intro { color: var(--muted); font-size: .79rem; margin-bottom: 15px; }
+    .evaluation-averages { display: grid; gap: 8px; }
+    .evaluation-average-row { display: grid; grid-template-columns: 1fr 68px 68px; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); font-size: .82rem; }
+    .evaluation-average-row:first-child { border-top: 0; }
+    .evaluation-average-row.current { color: var(--mint-deep); font-weight: 800; }
+    .evaluation-average-row span:not(:first-child) { text-align: right; font-weight: 900; }
+    .average-label { color: var(--muted); font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    .course-average { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+    .course-average-value { padding: 15px; border-radius: 13px; background: var(--mint); }
+    .course-average-value.all { background: var(--blue); }
+    .course-average-value strong { display: block; font-size: 2rem; line-height: 1; letter-spacing: -.07em; margin-top: 7px; }
+    .course-average-value small { color: var(--muted); font-size: .72rem; line-height: 1.3; }
+    .section-head { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 17px; }
+    .section-head p { color: var(--muted); font-size: .85rem; margin: 0; }
+    .eval-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 15px; margin-bottom: 22px; border: 1px solid var(--line); border-radius: 15px; background: var(--white); }
+    .eval-controls { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+    .select { border: 1px solid var(--line); color: var(--ink); background: var(--paper); border-radius: 9px; padding: 9px 12px; font-weight: 800; outline: none; }
+    .eval-date { font-size: .78rem; color: var(--muted); }
+    .status { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 999px; font-size: .7rem; font-weight: 900; }
+    .status.open { color: var(--mint-deep); background: var(--mint); }
+    .status.locked { color: #7f5f19; background: #fff1bd; }
+    .status.pending { color: var(--coral-deep); background: #ffe0d7; }
+    .notice { display: flex; align-items: center; justify-content: space-between; gap: 14px; background: var(--ink); color: white; border-radius: 15px; padding: 14px 17px; margin: -7px 0 23px; font-size: .84rem; }
+    .notice p { margin: 0; color: #d5e1db; }
+    .notice strong { color: white; }
+    .subject-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+    .subject-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 19px; min-width: 0; transition: transform .2s, box-shadow .2s; }
+    .subject-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+    .subject-head { display: flex; justify-content: space-between; gap: 12px; align-items: start; margin-bottom: 15px; }
+    .subject-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .subject-dot { width: 12px; height: 12px; flex: 0 0 12px; border-radius: 4px; background: var(--coral); }
+    .subject-card:nth-child(3n+2) .subject-dot { background: var(--sun); }
+    .subject-card:nth-child(3n) .subject-dot { background: #74b9db; }
+    .subject-title h3 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .subject-subtitle { color: var(--muted); font-size: .73rem; }
+    .card-menu { border: 0; background: transparent; color: var(--muted); padding: 3px 5px; font-size: 1.1rem; }
+    .grade-box { display: flex; align-items: end; justify-content: space-between; padding: 13px 0 16px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .grade-number { font-size: 2.7rem; line-height: .9; letter-spacing: -.08em; font-weight: 900; }
+    .grade-denom { color: var(--muted); font-size: .75rem; }
+    .weight-progress { height: 6px; border-radius: 9px; background: #eef1ec; overflow: hidden; margin-top: 12px; }
+    .weight-progress span { display: block; height: 100%; background: var(--mint-deep); border-radius: inherit; }
+    .component-list { margin: 15px 0 12px; display: grid; gap: 8px; }
+    .component { display: grid; grid-template-columns: 1fr 42px 48px; gap: 6px; align-items: center; font-size: .79rem; }
+    .component-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
+    .component-weight, .component-grade { color: var(--muted); text-align: right; font-size: .72rem; }
+    .component input { width: 42px; padding: 5px 4px; text-align: center; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: #fbfcfa; outline: none; }
+    .component input:focus, input:focus, textarea:focus, select:focus { border-color: var(--mint-deep); box-shadow: 0 0 0 3px rgba(45,124,88,.1); }
+    .card-foot { display: flex; justify-content: space-between; align-items: center; gap: 7px; }
+    .empty { grid-column: 1 / -1; text-align: center; border: 1px dashed #bdc9c1; padding: 45px 20px; border-radius: var(--radius); color: var(--muted); background: rgba(255,255,255,.55); }
+    .empty strong { display: block; color: var(--ink); margin-bottom: 7px; }
+    .modal-backdrop { position: fixed; inset: 0; z-index: 30; display: none; place-items: center; padding: 18px; background: rgba(20,33,31,.42); backdrop-filter: blur(8px); }
+    .modal-backdrop.show { display: grid; }
+    .modal { width: min(100%, 570px); max-height: 90vh; overflow: auto; background: var(--white); border-radius: 24px; padding: 28px; box-shadow: 0 25px 80px rgba(20,33,31,.24); animation: pop .25s ease-out; }
+    .profile-menu { width: min(100%, 390px); }
+    .profile-wrap { position: relative; }
+    .profile-popover { position: absolute; top: calc(100% + 9px); right: 0; z-index: 25; display: grid; gap: 4px; min-width: 190px; padding: 7px; border: 1px solid var(--line); border-radius: 13px; background: var(--white); box-shadow: 0 14px 35px rgba(20,33,31,.14); opacity: 0; visibility: hidden; transform: translateY(-5px); transition: opacity .18s ease, transform .18s ease, visibility .18s; }
+    .profile-wrap:hover .profile-popover, .profile-wrap.open .profile-popover, .profile-wrap:focus-within .profile-popover { opacity: 1; visibility: visible; transform: translateY(0); }
+    .profile-popover button { width: 100%; justify-content: flex-start; padding: 0 11px; background: transparent; color: var(--ink); }
+    .profile-popover button:hover { background: var(--mint); box-shadow: none; transform: none; }
+    @keyframes pop { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+    .modal h2 { font-size: 1.65rem; margin-bottom: 8px; }
+    .modal-intro { color: var(--muted); font-size: .87rem; line-height: 1.5; margin-bottom: 22px; }
+    .warning-box { padding: 13px 14px; margin-bottom: 18px; border-radius: 11px; color: var(--coral-deep); background: #fff0ed; font-size: .82rem; line-height: 1.45; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .field { display: grid; gap: 7px; margin-bottom: 15px; }
+    .field.full { grid-column: 1 / -1; }
+    label { color: var(--muted); font-size: .77rem; font-weight: 900; }
+    input, textarea { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; color: var(--ink); background: #fbfcfa; outline: none; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 9px; }
+    .modal-top { display: flex; justify-content: space-between; gap: 12px; }
+    .close-modal { border: 0; background: transparent; color: var(--muted); font-size: 1.3rem; width: 32px; height: 32px; }
+    .component-editor { display: grid; grid-template-columns: 1fr 85px 35px; gap: 7px; align-items: center; margin-bottom: 9px; }
+    .remove-row { border: 0; color: var(--coral-deep); background: #fff0ed; width: 30px; height: 30px; border-radius: 8px; }
+    .add-row { color: var(--mint-deep); background: transparent; border: 1px dashed #a9c9b6; padding: 8px 10px; border-radius: 8px; font-size: .8rem; font-weight: 800; }
+    .toggle-line { display: flex; align-items: center; gap: 9px; color: var(--ink); font-size: .84rem; font-weight: 700; }
+    .toggle-line input { width: auto; accent-color: var(--mint-deep); }
+    .tour { width: min(100%, 470px); }
+    .tour-marker { display: flex; gap: 5px; margin: 4px 0 20px; }
+    .tour-marker span { width: 25px; height: 5px; border-radius: 8px; background: var(--line); }
+    .tour-marker span.active { background: var(--coral); }
+    .tour-illustration { height: 110px; border-radius: 15px; margin-bottom: 20px; background: var(--mint); display: grid; place-items: center; font-size: 3rem; }
+    #tourIcon { display: inline-block; animation: tourPulse 2.2s ease-in-out infinite; transform-origin: center; }
+    @keyframes tourPulse { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.12) rotate(5deg); } }
+    .tour-step-enter { animation: tourStepEnter .42s cubic-bezier(.22,.75,.25,1) both; }
+    @keyframes tourStepEnter { from { opacity: .15; transform: translateX(22px) scale(.985); } to { opacity: 1; transform: translateX(0) scale(1); } }
+    .guided-focus { position: relative; z-index: 31; border-radius: 12px; box-shadow: 0 0 0 5px rgba(255,143,114,.3), 0 0 0 9px rgba(255,255,255,.9), 0 14px 35px rgba(20,33,31,.18); animation: guidedFocus 1.6s ease-in-out infinite; }
+    @keyframes guidedFocus { 0%, 100% { box-shadow: 0 0 0 5px rgba(255,143,114,.25), 0 0 0 9px rgba(255,255,255,.9), 0 14px 35px rgba(20,33,31,.18); } 50% { box-shadow: 0 0 0 8px rgba(255,143,114,.38), 0 0 0 12px rgba(255,255,255,.9), 0 14px 35px rgba(20,33,31,.18); } }
+    .toast { position: fixed; bottom: 22px; left: 50%; z-index: 50; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; color: white; background: var(--ink); padding: 12px 17px; border-radius: 10px; font-size: .84rem; transition: .25s; }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    .guided-delay { position: fixed; left: 50%; bottom: 20px; z-index: 80; width: min(380px, calc(100vw - 36px)); padding: 8px; border: 1px solid rgba(20,33,31,.08); border-radius: 12px; background: rgba(255,255,255,.94); box-shadow: 0 12px 35px rgba(20,33,31,.16); opacity: 0; transform: translate(-50%, 14px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+    .guided-delay.show { opacity: 1; transform: translate(-50%, 0); }
+    .guided-delay-track { height: 5px; overflow: hidden; border-radius: 999px; background: var(--line); }
+    .guided-delay-progress { width: 0; height: 100%; border-radius: inherit; background: var(--coral); transition: width .08s linear; }
+      .custom-cursor { --cursor-scale: 1; --cursor-x: 0px; --cursor-y: 0px; position: fixed; top: 0; left: 0; z-index: 100; width: 32px; height: 32px; pointer-events: none; opacity: 0; color: #323232; transform: translate3d(var(--cursor-x), var(--cursor-y), 0) translate(-6px, -6px); transition: opacity .16s ease; will-change: transform; }
+      .custom-cursor.visible { opacity: 1; }
+      .custom-cursor.hover svg { transform: scale(1.42); }
+      .custom-cursor.onboarding svg { transition: none; }
+      .custom-cursor svg { display: block; width: 32px; height: 32px; transform: scale(var(--cursor-scale)); transform-origin: 6px 6px; transition: transform .1s cubic-bezier(.2,.8,.2,1); }
+    .settings-panel { display: none; }
+    .settings-panel.show { display: block; }
+    @media (max-width: 900px) { .subject-grid { grid-template-columns: repeat(2, 1fr); } .stats { grid-template-columns: repeat(2, 1fr); } .averages-panel { grid-template-columns: 1fr; } }
+    @media (max-width: 620px) { .topbar { height: 65px; padding: 0 18px; } .user-chip span { display: none; } .main { padding: 30px 18px 55px; } .hero { display: block; } .hero-actions { display: grid; grid-template-columns: 1fr 1fr; margin-top: 20px; } .hero-actions .button { width: 100%; } .stats, .subject-grid { grid-template-columns: 1fr; } .stat { padding: 15px; } .eval-bar, .notice { align-items: stretch; flex-direction: column; } .eval-controls { width: 100%; } .eval-controls .select { flex: 1; min-width: 0; } .modal { padding: 21px; border-radius: 19px; } .form-grid { grid-template-columns: 1fr; gap: 0; } .field.full { grid-column: auto; } h1 { font-size: 3rem; } .evaluation-average-row { grid-template-columns: 1fr 58px 58px; } .course-average-value { padding: 12px; } .course-average-value strong { font-size: 1.7rem; } }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 35 35" role="img" aria-labelledby="title desc"><title id="title">Logo de Notalia</title><desc id="desc">Marca grafica con una N geometrica</desc><rect width="35" height="35" rx="11" fill="#ff8f72"/><path d="M10 25V10h3.6l7.4 9.4V10H25v15h-3.6L14 15.6V25z" fill="#14211f" transform="rotate(-7 17.5 17.5)"/></svg></span><span>Notalia</span></div>
+      <div class="top-actions"><div class="profile-wrap" id="profileWrap"><button class="user-chip" id="profileBtn" type="button" aria-label="Abrir opciones de tu cuenta"><span id="userGreeting">Tu espacio</span><span class="avatar" id="userAvatar">?</span></button><div class="profile-popover" id="profilePopover"><button class="button small" id="openLanguageFromProfile" type="button">文 <span id="popoverLanguageText">Idioma</span></button><button class="button small danger" id="openDeleteFromPopover" type="button">⌫ <span id="popoverDeleteText">Borrar datos</span></button></div></div></div>
+    </header>
+    <main class="main">
+      <section class="hero">
+        <div><p class="eyebrow" id="todayLabel">Tu panel de estudio</p><h1>Hola, <span id="nameDisplay">estudiante</span>.</h1><p class="hero-copy">Un sitio sencillo para ver cómo va tu evaluación, sin perder de vista lo importante.</p></div>
+        <div class="hero-actions"><button class="button soft" id="averagesBtn">▦ Ver medias</button><button class="button accent" id="addSubjectBtn">＋ Añadir asignatura</button></div>
+      </section>
+      <div id="subjectsView"><section class="stats" id="stats"></section><section class="dashboard-section" id="subjectsSection">
+        <div class="section-kicker">Trabajo del periodo</div><div class="section-head"><div><h2>Asignaturas</h2><p id="subjectHint">Tus notas, de un vistazo.</p></div><button class="button ghost small" id="copyEvaluationBtn">↗ Copiar evaluación anterior</button></div>
+        <div class="eval-bar"><div class="eval-controls"><select class="select" id="evaluationSelect" aria-label="Seleccionar evaluación"></select><button class="button ghost small" id="editEvaluationBtn">✎ Editar evaluación</button><button class="button soft small" id="newEvaluationBtn">＋ Nueva evaluación</button></div><div id="evaluationMeta"></div></div>
+        <div id="closureNotice"></div>
+        <div class="subject-grid" id="subjectGrid"></div>
+      </section></div>
+      <section class="dashboard-section" id="averagesSection"><div class="section-kicker">Visión general</div><div class="section-head"><div><h2>Medias</h2><p>Compara tus evaluaciones y el resultado acumulado.</p></div></div><div id="averages"></div></section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="setupModal"><div class="modal">
+    <div class="modal-top"><div><p class="eyebrow">Tu espacio de estudio</p><h2>Vamos a prepararlo.</h2></div></div>
+    <p class="modal-intro">Cuéntame cómo te llamas y cuándo termina tu primera evaluación. Podrás ajustar todo después. Ninguna información se guarda en servidores: todo queda guardado en tu ordenador.</p>
+    <form id="setupForm"><div class="form-grid"><div class="field full"><label for="setupName">Tu nombre</label><input id="setupName" required placeholder="Ej. Lucía"></div><div class="field"><label for="setupEvalName">Nombre de la evaluación</label><input id="setupEvalName" required value="1ª evaluación"></div><div class="field"><label for="setupEndDate">Fecha de finalización</label><input id="setupEndDate" type="date" required></div></div><div class="modal-actions"><button class="button primary" type="submit">Crear mi espacio →</button></div></form>
+  </div></div>
+
+  <div class="modal-backdrop" id="subjectModal"><div class="modal"><div class="modal-top"><div><p class="eyebrow">Asignaturas</p><h2 id="subjectModalTitle">Añadir asignatura</h2></div><button class="close-modal" data-close="subjectModal">×</button></div><p class="modal-intro">Define el nombre y el reparto de esta evaluación. Las notas pueden añadirse ahora o más adelante.</p><form id="subjectForm"><input type="hidden" id="editingSubjectId"><div class="field"><label for="subjectName">Nombre de la asignatura</label><input id="subjectName" required placeholder="Ej. Historia"></div><label class="toggle-line"><input type="checkbox" id="nonComputable"> No computable para la media</label><div style="height:18px"></div><label>Partes de la evaluación</label><div id="componentEditor" style="margin-top:9px"></div><button class="add-row" type="button" id="addComponentBtn">＋ Añadir examen, proyecto...</button><div class="modal-actions"><button class="button danger small" id="deleteSubjectBtn" type="button">⌫ Eliminar</button><button class="button ghost" type="button" data-close="subjectModal">Cancelar</button><button class="button primary" type="submit">Guardar asignatura</button></div></form></div></div>
+
+  <div class="modal-backdrop" id="evaluationModal"><div class="modal"><div class="modal-top"><div><p class="eyebrow">Calendario</p><h2 id="evaluationModalTitle">Nueva evaluación</h2></div><button class="close-modal" data-close="evaluationModal">×</button></div><p class="modal-intro" id="evaluationModalIntro">Las asignaturas se mantienen, pero sus partes y notas empiezan en blanco.</p><form id="evaluationForm"><div class="form-grid"><div class="field"><label for="newEvalName">Nombre</label><input id="newEvalName" required placeholder="2ª evaluación"></div><div class="field"><label for="newEvalEnd">Fecha de finalización</label><input id="newEvalEnd" type="date" required></div></div><label class="toggle-line"><input type="checkbox" id="evaluationCompleted"> Marcar evaluación como completada</label><p class="modal-intro" style="margin:8px 0 0;font-size:.76rem">Al completarla, quedará bloqueada y ya no podrás editar sus notas o datos hasta desbloquearla.</p><div class="modal-actions"><button class="button ghost" type="button" data-close="evaluationModal">Cancelar</button><button class="button primary" id="saveEvaluationBtn" type="submit">Crear evaluación</button></div></form></div></div>
+
+  <div class="modal-backdrop" id="closeModal"><div class="modal"><div class="modal-top"><div><p class="eyebrow">Cierre de evaluación</p><h2>¿Todo listo para cerrar?</h2></div><button class="close-modal" data-close="closeModal">×</button></div><p class="modal-intro">Al cerrar, esta evaluación quedará protegida para que puedas consultarla sin cambiar sus notas. Podrás desbloquearla más tarde si detectas un error.</p><div class="modal-actions"><button class="button ghost" data-close="closeModal">Seguir revisando</button><button class="button primary" id="confirmCloseBtn">Cerrar evaluación</button></div></div></div>
+
+  <div class="modal-backdrop" id="tourModal"><div class="modal tour"><div class="tour-illustration"><span id="tourIcon">✦</span></div><div class="tour-marker" id="tourMarkers"></div><p class="eyebrow" id="tourEyebrow">Un paseo rápido</p><h2 id="tourTitle"></h2><p class="modal-intro" id="tourText"></p><div class="modal-actions"><button class="button ghost" id="tourBack">← Atrás</button><button class="button ghost" id="tourSkip">Saltar tour</button><button class="button primary" id="tourNext">Siguiente →</button></div></div></div>
+  <div class="modal-backdrop" id="guidedModal"><div class="modal tour"><div class="tour-illustration"><span id="guidedIcon">✦</span></div><p class="eyebrow" id="guidedEyebrow">Tu primer paso</p><h2 id="guidedTitle"></h2><p class="modal-intro" id="guidedText"></p><div class="modal-actions"><button class="button primary" id="guidedAction"></button></div></div></div>
+  <div class="modal-backdrop" id="guidedFinishModal"><div class="modal"><div class="modal-top"><div><p class="eyebrow">Antes de empezar</p><h2>¿Qué hacemos con la demostración?</h2></div></div><p class="modal-intro">Durante el recorrido hemos creado una asignatura y añadido una nota para enseñarte cómo funciona Notalia.</p><div class="warning-box"><strong>¿Quieres conservar esas acciones?</strong><br>Si las borras, entrarás al panel vacío y el recorrido no volverá a aparecer.</div><div class="modal-actions"><button class="button danger" id="clearGuidedData">Borrar acciones</button><button class="button primary" id="keepGuidedData">Mantener y empezar</button></div></div></div>
+  <div class="modal-backdrop" id="profileModal"><div class="modal profile-menu"><div class="modal-top"><div><p class="eyebrow" id="profileEyebrow">Cuenta</p><h2 id="profileTitle">Idioma</h2></div><button class="close-modal" data-close="profileModal">×</button></div><div class="field"><label for="languageSelect" id="languageLabel">Idioma</label><select class="select" id="languageSelect"><option value="es">Español</option><option value="en">English</option><option value="eu">Euskara</option></select></div></div></div>
+  <div class="guided-delay" id="guidedDelay" aria-hidden="true"><div class="guided-delay-track"><div class="guided-delay-progress" id="guidedDelayProgress"></div></div></div>
+  <div class="modal-backdrop" id="deleteModal"><div class="modal"><div class="modal-top"><div><p class="eyebrow">Zona delicada</p><h2>Borrar todos tus datos</h2></div><button class="close-modal" data-close="deleteModal">×</button></div><p class="modal-intro">Esta acción eliminará permanentemente tu nombre, evaluaciones, asignaturas, notas, porcentajes y toda la información guardada en este navegador.</p><div class="warning-box"><strong>No se puede deshacer.</strong> Al confirmar, Notalia volverá a su pantalla de bienvenida como si entraras por primera vez.</div><form id="deleteForm"><label class="toggle-line"><input type="checkbox" id="deleteConfirm" required> Entiendo que se borrará toda mi información.</label><div class="field" style="margin-top:16px"><label for="deletePhrase">Escribe BORRAR TODO para continuar</label><input id="deletePhrase" required autocomplete="off" pattern="BORRAR TODO" placeholder="BORRAR TODO"></div><div class="modal-actions"><button class="button ghost" type="button" data-close="deleteModal">Cancelar</button><button class="button danger" type="submit">Borrar definitivamente</button></div></form></div></div>
+  <div class="custom-cursor" id="customCursor" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.68602 16.288L8.10556 9.37387C7.96399 7.68752 9.85032 6.59846 11.24 7.56424L16.9375 11.524C18.6256 12.6972 17.6579 15.348 15.611 15.1577L14.8273 15.0849C13.9821 15.0063 13.1795 15.4697 12.825 16.2409L12.4962 16.9561C11.6376 18.8238 8.858 18.3365 8.68602 16.288Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORE = 'notalia-v1';
+    const today = new Date();
+    const isoToday = today.toISOString().slice(0, 10);
+    const $ = id => document.getElementById(id);
+    let state = loadState();
+    let tourStep = 0;
+    let tourMode = 'app';
+    let currentView = 'subjects';
+    const guidedSteps = {
+      subject: { icon: '＋', eyebrow: 'Paso 1 de 4', title: 'Crea tu primera asignatura', text: 'Busca el botón “Añadir asignatura” y púlsalo. Se abrirá el formulario donde podrás configurar el nombre y el reparto de exámenes, proyectos o trabajos.', action: 'Mostrar botón de asignatura' },
+      grade: { icon: '✎', eyebrow: 'Paso 2 de 4', title: 'Añade una nota', text: 'Ahora introduce una nota en el primer componente. Fíjate en cómo se actualizan la nota de la asignatura, el progreso y la media.', action: 'Ir a la nota' },
+      config: { icon: '⚙', eyebrow: 'Paso 3 de 4', title: 'Conoce la configuración', text: 'Ahora te enseñamos el botón que debes pulsar para abrir la configuración de la evaluación.', action: 'Mostrar botón de configuración' },
+      averages: { icon: '▦', eyebrow: 'Paso 4 de 4', title: 'Consulta tus medias', text: 'Busca el botón de medias y púlsalo para entrar en la página donde verás tus evaluaciones y el resultado del curso.', action: 'Mostrar botón de medias' },
+      finish: { icon: '✓', eyebrow: 'Recorrido terminado', title: 'Ya puedes empezar', text: 'Has visto el flujo principal de Notalia. A partir de ahora puedes añadir tus asignaturas y registrar tus notas con normalidad.', action: 'Empezar a estudiar' }
+    };
+    const translations = {
+      es: { account: 'Cuenta', preferences: 'Preferencias', language: 'Idioma', deleteData: 'Borrar todos mis datos', viewAverages: '▦ Ver medias', addSubject: '＋ Añadir asignatura', copyEvaluation: '↗ Copiar evaluación anterior', editEvaluation: '✎ Editar evaluación', newEvaluation: '＋ Nueva evaluación', subjects: 'Asignaturas', subjectsHint: 'Tus notas, de un vistazo.', averages: 'Medias', averagesHint: 'Compara tus evaluaciones y el resultado acumulado.', media: 'Media', progress: 'Progreso', closure: 'Cierre', computableOnly: 'solo computables', noGrades: 'Añade alguna nota' },
+      en: { account: 'Account', preferences: 'Preferences', language: 'Language', deleteData: 'Delete all my data', viewAverages: '▦ View averages', addSubject: '＋ Add subject', copyEvaluation: '↗ Copy previous evaluation', editEvaluation: '✎ Edit evaluation', newEvaluation: '＋ New evaluation', subjects: 'Subjects', subjectsHint: 'Your grades, at a glance.', averages: 'Averages', averagesHint: 'Compare your evaluations and course result.', media: 'Average', progress: 'Progress', closure: 'End date', computableOnly: 'computable only', noGrades: 'Add a grade' },
+      eu: { account: 'Kontua', preferences: 'Hobespenak', language: 'Hizkuntza', deleteData: 'Ezabatu nire datu guztiak', viewAverages: '▦ Ikusi batez bestekoak', addSubject: '＋ Gehitu irakasgaia', copyEvaluation: '↗ Kopiatu aurreko ebaluazioa', editEvaluation: '✎ Editatu ebaluazioa', newEvaluation: '＋ Ebaluazio berria', subjects: 'Irakasgaiak', subjectsHint: 'Zure notak, begiratu batean.', averages: 'Batez bestekoak', averagesHint: 'Konparatu ebaluazioak eta ikasturteko emaitza.', media: 'Batez bestekoa', progress: 'Aurrerapena', closure: 'Amaiera-data', computableOnly: 'konputagarriak bakarrik', noGrades: 'Gehitu nota bat' }
+    };
+    const tourSteps = [
+      { icon: '✦', title: 'Bienvenido a Notalia', text: 'Vamos a hacer un recorrido por la app y luego la configuramos.' },
+      { icon: '▦', title: 'Tu centro de control', text: 'Aquí encontrarás la media de la evaluación, el progreso de tus notas y los próximos pasos.' },
+      { icon: '＋', title: 'Añade tus asignaturas', text: 'Cada asignatura puede tener tantos exámenes, proyectos o trabajos como necesites, con su propio porcentaje.' },
+      { icon: '↗', title: 'Copia lo que se mantiene', text: 'Al comenzar una evaluación nueva puedes traer la configuración anterior con un toque y ahorrar tiempo.' },
+      { icon: '✓', title: 'Todo queda guardado', text: 'Ninguna información se guarda en servidores: tus datos se quedan en tu ordenador, dentro de este navegador. Cuando llegue la fecha de cierre, podrás revisar y bloquear la evaluación.' }
+    ];
+
+    function loadState() { try { return JSON.parse(localStorage.getItem(STORE)) || null; } catch { return null; } }
+    function save() { localStorage.setItem(STORE, JSON.stringify(state)); }
+    function uid(prefix = 'id') { return prefix + Math.random().toString(36).slice(2, 9); }
+    function formatDate(date) { if (!date) return ''; return new Intl.DateTimeFormat('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(date + 'T12:00:00')); }
+    function formatGrade(value) { return value === null || value === undefined || value === '' ? '—' : Number(value).toLocaleString('es-ES', { maximumFractionDigits: 2 }); }
+    function currentEvaluation() { return state.evaluations.find(e => e.id === state.currentEvaluationId) || state.evaluations[0]; }
+    function findSubject(id) { return state.subjects.find(s => s.id === id); }
+    function isDue(evaluation) { return evaluation && !evaluation.locked && evaluation.endDate && evaluation.endDate <= isoToday; }
+    function subjectGrade(subject) { const parts = subject.components.filter(c => c.grade !== null && c.grade !== ''); const totalWeight = subject.components.reduce((sum, c) => sum + Number(c.weight || 0), 0); if (!parts.length || !totalWeight) return null; return parts.reduce((sum, c) => sum + (Number(c.grade) * Number(c.weight || 0) / 100), 0); }
+    function averageForEvaluation(evaluation, includeNonComputable = false) { const values = state.subjects.map(s => ({ s, grade: subjectGrade(s.evaluations[evaluation.id] || { components: [] }) })).filter(x => x.grade !== null && (includeNonComputable || !x.s.nonComputable)); return values.length ? values.reduce((sum, x) => sum + x.grade, 0) / values.length : null; }
+    function evalAverage(evaluation) { return averageForEvaluation(evaluation); }
+    function courseAverage(includeNonComputable = false) { const values = state.evaluations.flatMap(evaluation => state.subjects.map(s => ({ s, grade: subjectGrade(s.evaluations[evaluation.id] || { components: [] }) }))).filter(x => x.grade !== null && (includeNonComputable || !x.s.nonComputable)); return values.length ? values.reduce((sum, x) => sum + x.grade, 0) / values.length : null; }
+    function currentSubjectData(subject) { const evaluation = currentEvaluation(); return subject.evaluations[evaluation.id] || { components: [] }; }
+    function languageLabels() { return translations[state?.language || 'es']; }
+    function applyLanguage() { if (!state) return; const labels = languageLabels(); document.documentElement.lang = state.language || 'es'; $('averagesBtn').textContent = labels.viewAverages; $('addSubjectBtn').textContent = labels.addSubject; $('copyEvaluationBtn').textContent = labels.copyEvaluation; $('editEvaluationBtn').textContent = labels.editEvaluation; $('newEvaluationBtn').textContent = labels.newEvaluation; document.querySelector('#subjectsSection h2').textContent = labels.subjects; $('subjectHint').textContent = labels.subjectsHint; document.querySelector('#averagesSection h2').textContent = labels.averages; document.querySelector('#averagesSection .section-head p').textContent = labels.averagesHint; $('profileEyebrow').textContent = labels.account; $('profileTitle').textContent = labels.language; $('languageLabel').textContent = labels.language; $('popoverLanguageText').textContent = labels.language; $('popoverDeleteText').textContent = labels.deleteData; $('languageSelect').value = state.language || 'es'; }
+    function render() { if (!state) return; const evaluation = currentEvaluation(); $('nameDisplay').textContent = state.name; $('userGreeting').textContent = state.name; $('userAvatar').textContent = state.name.charAt(0).toUpperCase(); $('todayLabel').textContent = 'Panel · ' + new Intl.DateTimeFormat(state.language === 'en' ? 'en-GB' : state.language === 'eu' ? 'eu-ES' : 'es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).format(today); renderSelect(); renderStats(evaluation); renderAverages(evaluation); renderMeta(evaluation); renderNotice(evaluation); renderSubjects(evaluation); setView(currentView); applyLanguage(); }
+    function setView(view) { currentView = view; const isAverages = view === 'averages'; $('subjectsView').style.display = isAverages ? 'none' : ''; $('averagesSection').style.display = isAverages ? '' : 'none'; $('averagesBtn').textContent = isAverages ? '← Asignaturas' : '▦ Ver medias'; $('addSubjectBtn').style.display = isAverages || currentEvaluation().locked ? 'none' : ''; }
+    function renderSelect() { $('evaluationSelect').innerHTML = state.evaluations.map(e => `<option value="${e.id}" ${e.id === state.currentEvaluationId ? 'selected' : ''}>${escapeHtml(e.name)}</option>`).join(''); }
+    function renderStats(evaluation) { const average = evalAverage(evaluation); const completed = state.subjects.filter(s => subjectGrade(currentSubjectData(s)) !== null).length; $('stats').innerHTML = `<div class="stat"><div class="stat-label">Media · ${escapeHtml(evaluation.name)}</div><div class="stat-value">${average === null ? '—' : formatGrade(average)}</div><div class="stat-note">${average === null ? 'Añade alguna nota' : 'sobre 10 · solo computables'}</div></div><div class="stat"><div class="stat-label">Progreso</div><div class="stat-value">${state.subjects.length ? Math.round(completed / state.subjects.length * 100) : 0}%</div><div class="stat-note">${completed} de ${state.subjects.length} asignaturas con nota</div></div><div class="stat"><div class="stat-label">Asignaturas</div><div class="stat-value">${state.subjects.length}</div><div class="stat-note">${state.subjects.filter(s => !s.nonComputable).length} computables</div></div><div class="stat"><div class="stat-label">Cierre</div><div class="stat-value" style="font-size:1.5rem">${formatDate(evaluation.endDate) || 'Sin fecha'}</div><div class="stat-note">${evaluation.locked ? 'Evaluación bloqueada' : 'Fecha de evaluación'}</div></div>`; }
+    function renderAverages(current) { const allCourse = courseAverage(true); const computableCourse = courseAverage(false); $('averages').innerHTML = `<div class="averages-panel"><div class="average-card"><h2>Medias por evaluación</h2><p class="average-card-intro">Una única comparativa de cada periodo, con y sin asignaturas no computables.</p><div class="evaluation-average-row"><span></span><span class="average-label">Todas</span><span class="average-label">Computables</span></div><div class="evaluation-averages">${state.evaluations.map(evaluation => `<div class="evaluation-average-row ${evaluation.id === current.id ? 'current' : ''}"><span>${escapeHtml(evaluation.name)}${evaluation.id === current.id ? ' · actual' : ''}</span><span>${formatGrade(averageForEvaluation(evaluation, true))}</span><span>${formatGrade(averageForEvaluation(evaluation))}</span></div>`).join('')}</div></div><div class="average-card"><h2>Media del curso</h2><p class="average-card-intro">Promedio de todas las notas registradas en tus evaluaciones.</p><div class="course-average"><div class="course-average-value all"><small>Todas las asignaturas</small><strong>${formatGrade(allCourse)}</strong></div><div class="course-average-value"><small>Solo computables</small><strong>${formatGrade(computableCourse)}</strong></div></div></div></div>`; }
+    function renderMeta(evaluation) { const status = evaluation.locked ? '<span class="status locked">● Completada</span>' : isDue(evaluation) ? '<span class="status pending">● Pendiente de cierre</span>' : '<span class="status open">● En curso</span>'; $('evaluationMeta').innerHTML = `<span class="eval-date">Termina el ${formatDate(evaluation.endDate)} &nbsp; ${status}</span>`; $('copyEvaluationBtn').style.display = state.evaluations.length > 1 && !evaluation.locked ? 'inline-flex' : 'none'; $('editEvaluationBtn').style.display = evaluation.locked ? 'none' : ''; $('addSubjectBtn').style.display = evaluation.locked ? 'none' : ''; }
+    function renderNotice(evaluation) { $('closureNotice').innerHTML = isDue(evaluation) ? `<div class="notice"><p><strong>Tu evaluación ha terminado.</strong> Revisa que estén todas tus notas antes de cerrarla.</p><button class="button accent small" id="closeEvaluationBtn">Revisar y cerrar</button></div>` : evaluation.locked ? `<div class="notice"><p><strong>Evaluación protegida.</strong> Puedes consultarla tal como quedó.</p><button class="button ghost small" id="unlockEvaluationBtn">Desbloquear para editar</button></div>` : ''; const closeBtn = $('closeEvaluationBtn'); if (closeBtn) closeBtn.onclick = () => openModal('closeModal'); const unlockBtn = $('unlockEvaluationBtn'); if (unlockBtn) unlockBtn.onclick = () => { evaluation.locked = false; save(); render(); toast('Evaluación desbloqueada para editar'); }; }
+    function renderSubjects(evaluation) { const grid = $('subjectGrid'); if (!state.subjects.length) { grid.innerHTML = '<div class="empty"><strong>Aún no tienes asignaturas</strong><span>Añade la primera para empezar a repartir tus notas.</span><button class="button accent small" id="emptyAddSubjectBtn">＋ Añadir asignatura</button></div>'; $('emptyAddSubjectBtn').onclick = () => openSubject(); return; } grid.innerHTML = state.subjects.map(subject => { const data = currentSubjectData(subject); const grade = subjectGrade(data); const weight = data.components.reduce((sum, c) => sum + Number(c.weight || 0), 0); const locked = evaluation.locked; return `<article class="subject-card"><div class="subject-head"><div class="subject-title"><span class="subject-dot"></span><div><h3 title="${escapeHtml(subject.name)}">${escapeHtml(subject.name)}</h3><div class="subject-subtitle">${subject.nonComputable ? 'No computable' : 'Cuenta para la media'}</div></div></div>${locked ? '' : `<button class="card-menu" data-edit="${subject.id}" aria-label="Editar asignatura">•••</button>`}</div><div class="grade-box"><div><div class="grade-number">${grade === null ? '—' : formatGrade(grade)}</div><div class="grade-denom">nota calculada / 10</div></div><div style="text-align:right"><span class="status ${grade === null ? 'pending' : 'open'}">${grade === null ? 'Pendiente' : 'En progreso'}</span></div></div><div class="weight-progress"><span style="width:${Math.min(weight, 100)}%"></span></div><div class="component-list">${data.components.length ? data.components.map(component => `<div class="component"><span class="component-name" title="${escapeHtml(component.name)}">${escapeHtml(component.name)}</span><span class="component-weight">${component.weight}%</span><span class="component-grade">${locked ? formatGrade(component.grade) : `<input type="number" min="0" max="10" step="0.01" value="${component.grade ?? ''}" data-subject="${subject.id}" data-component="${component.id}" aria-label="Nota de ${escapeHtml(component.name)}">`}</span></div>`).join('') : '<span class="subject-subtitle">Añade partes para esta evaluación.</span>'}</div><div class="card-foot"><span class="subject-subtitle">${weight}% repartido</span>${!locked && state.evaluations.length > 1 ? `<button class="button ghost small" data-copy-subject="${subject.id}">Copiar anterior</button>` : ''}</div></article>`; }).join(''); grid.querySelectorAll('input[data-component]').forEach(input => input.addEventListener('change', updateGrade)); grid.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => openSubject(btn.dataset.edit))); grid.querySelectorAll('[data-copy-subject]').forEach(btn => btn.addEventListener('click', () => copySubject(btn.dataset.copySubject))); }
+    function updateGrade(event) { const subject = findSubject(event.target.dataset.subject); const component = currentSubjectData(subject).components.find(c => c.id === event.target.dataset.component); if (component) component.grade = event.target.value === '' ? null : Math.max(0, Math.min(10, Number(event.target.value))); const guidedGrade = state.guidedStep === 'gradeInput' && component && component.grade !== null; save(); render(); toast('Nota guardada'); if (guidedGrade) { state.guidedStep = 'config'; save(); startGuidedStep(); } }
+    function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c])); }
+    function syncModalCursor() { document.body.classList.toggle('modal-active', Boolean(document.querySelector('.modal-backdrop.show'))); }
+    function openModal(id) { $(id).classList.add('show'); syncModalCursor(); }
+    function closeModal(id) { $(id).classList.remove('show'); syncModalCursor(); if (id === 'evaluationModal' && state?.guidedStep === 'configOpen') { guidedDelayStep = 'averages'; guidedDelayReady = true; deliverGuidedStep(); } }
+    function toast(message) { const el = $('toast'); el.textContent = message; el.classList.add('show'); clearTimeout(window.toastTimer); window.toastTimer = setTimeout(() => el.classList.remove('show'), 2300); }
+    function componentRow(component = { name: '', weight: '' }) { const row = document.createElement('div'); row.className = 'component-editor'; row.innerHTML = `<input class="component-name-input" required placeholder="Examen final" value="${escapeHtml(component.name)}"><input class="component-weight-input" required type="number" min="0" max="100" step="1" placeholder="%" value="${component.weight}"><button class="remove-row" type="button">×</button>`; row.querySelector('.remove-row').onclick = () => row.remove(); return row; }
+    function openSubject(id = '') { if (currentEvaluation().locked) return toast('Desbloquea la evaluación para editar asignaturas'); const subject = findSubject(id); $('editingSubjectId').value = id; $('subjectModalTitle').textContent = subject ? 'Editar asignatura' : 'Añadir asignatura'; $('subjectName').value = subject?.name || ''; $('nonComputable').checked = subject?.nonComputable || false; $('deleteSubjectBtn').style.display = id ? 'inline-flex' : 'none'; const editor = $('componentEditor'); editor.innerHTML = ''; const components = subject ? currentSubjectData(subject).components : [{ name: 'Examen final', weight: 70 }, { name: 'Parcial', weight: 20 }, { name: 'Proyecto', weight: 10 }]; components.forEach(c => editor.appendChild(componentRow(c))); openModal('subjectModal'); }
+    function copySubject(id) { const subject = findSubject(id); const index = state.evaluations.findIndex(e => e.id === state.currentEvaluationId); const previous = state.evaluations[index - 1]; if (!previous || !subject.evaluations[previous.id]) return; subject.evaluations[state.currentEvaluationId] = { components: subject.evaluations[previous.id].components.map(c => ({ ...c, id: uid('component-'), grade: null })) }; save(); render(); toast('Configuración copiada, notas en blanco'); }
+    function startTour(mode = 'app') { tourMode = mode; tourStep = 0; updateTour(); openModal('tourModal'); }
+    function finishTour() { closeModal('tourModal'); if (tourMode === 'intro') { $('setupEndDate').value = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate()).toISOString().slice(0, 10); openModal('setupModal'); return; } state.tourSeen = true; save(); }
+    function updateTour() { const step = tourSteps[tourStep]; $('tourIcon').textContent = step.icon; $('tourTitle').textContent = step.title; $('tourText').textContent = step.text; $('tourEyebrow').textContent = tourStep === 0 ? 'Antes de empezar' : 'Un paseo rápido'; $('tourMarkers').innerHTML = tourSteps.map((_, i) => `<span class="${i === tourStep ? 'active' : ''}"></span>`).join(''); $('tourBack').style.visibility = tourStep === 0 ? 'hidden' : 'visible'; $('tourNext').textContent = tourStep === tourSteps.length - 1 ? 'Configurar mi espacio →' : 'Siguiente →'; animateTourStep(); }
+    function animateTourStep() { const tourCard = document.querySelector('#tourModal .tour'); if (!tourCard) return; tourCard.classList.remove('tour-step-enter'); void tourCard.offsetWidth; tourCard.classList.add('tour-step-enter'); }
+    let guidedDelayStep = null;
+    let guidedDelayReady = false;
+    function deliverGuidedStep() { if (!guidedDelayStep) return; $('guidedDelay').classList.remove('show'); clearGuidedFocus(); state.guidedStep = guidedDelayStep; guidedDelayStep = null; guidedDelayReady = false; save(); startGuidedStep(); }
+    function scheduleGuidedStep(stepName) { const delay = 7000; const delayBar = $('guidedDelay'); const progress = $('guidedDelayProgress'); const started = performance.now(); guidedDelayStep = stepName; guidedDelayReady = false; delayBar.classList.add('show'); progress.style.width = '0%'; const tick = now => { const percentage = Math.min((now - started) / delay * 100, 100); progress.style.width = `${percentage}%`; if (percentage < 100) window.requestAnimationFrame(tick); else { guidedDelayReady = true; if (!$('evaluationModal').classList.contains('show')) deliverGuidedStep(); } }; window.requestAnimationFrame(tick); }
+    function clearGuidedFocus() { document.querySelectorAll('.guided-focus').forEach(element => element.classList.remove('guided-focus')); }
+    function focusGuidedTarget(selector) { clearGuidedFocus(); const target = document.querySelector(selector); if (target) { target.classList.add('guided-focus'); target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }
+    function startGuidedStep() { if (!state?.guidedStep) return; const stepName = state.guidedStep === 'subjectForm' || state.guidedStep === 'subjectButton' ? 'subject' : state.guidedStep === 'gradeInput' ? 'grade' : state.guidedStep === 'configView' || state.guidedStep === 'configOpen' || state.guidedStep === 'configButton' ? 'config' : state.guidedStep === 'finishView' ? 'finish' : state.guidedStep === 'averagesButton' ? 'averages' : state.guidedStep; const step = guidedSteps[stepName]; if (!step) return; $('guidedIcon').textContent = step.icon; $('guidedEyebrow').textContent = step.eyebrow; $('guidedTitle').textContent = step.title; $('guidedText').textContent = step.text; $('guidedAction').textContent = step.action; openModal('guidedModal'); }
+    function handleGuidedAction() { const rawStep = state.guidedStep; const step = rawStep === 'subjectForm' || rawStep === 'subjectButton' ? 'subject' : rawStep === 'gradeInput' ? 'grade' : rawStep === 'configView' || rawStep === 'configOpen' || rawStep === 'configButton' ? 'config' : rawStep === 'finishView' ? 'finish' : rawStep === 'averagesButton' ? 'averages' : rawStep; if (step === 'subject') { state.guidedStep = 'subjectButton'; save(); closeModal('guidedModal'); setView('subjects'); focusGuidedTarget('#addSubjectBtn'); return; } if (step === 'grade') { state.guidedStep = 'gradeInput'; save(); closeModal('guidedModal'); render(); focusGuidedTarget('#subjectGrid input[data-component]'); return; } if (step === 'config') { state.guidedStep = 'configButton'; save(); closeModal('guidedModal'); setView('subjects'); focusGuidedTarget('#editEvaluationBtn'); return; } if (step === 'averages') { state.guidedStep = 'averagesButton'; save(); closeModal('guidedModal'); setView('subjects'); focusGuidedTarget('#averagesBtn'); return; } if (step === 'finish') { closeModal('guidedModal'); openModal('guidedFinishModal'); } }
+    function openDeleteModal() { if (state) { $('deleteConfirm').checked = false; $('deletePhrase').value = ''; openModal('deleteModal'); } }
+    function openProfileModal() { if (state) { $('languageSelect').value = state.language || 'es'; openModal('profileModal'); } }
+    function initCustomCursor() { const cursor = $('customCursor'); if (!cursor || window.matchMedia('(pointer: coarse)').matches) return; let lastX = 0; let lastY = 0; let lastTime = performance.now(); document.addEventListener('pointermove', event => { const now = performance.now(); const elapsed = Math.max(now - lastTime, 8); const distance = Math.hypot(event.clientX - lastX, event.clientY - lastY); const speed = distance / elapsed; const speedScale = Math.min(speed * .08, .35); const modalOpen = document.querySelector('.modal-backdrop.show'); cursor.style.setProperty('--cursor-x', `${event.clientX}px`); cursor.style.setProperty('--cursor-y', `${event.clientY}px`); cursor.style.setProperty('--cursor-scale', (1 + speedScale).toFixed(2)); cursor.classList.toggle('onboarding', Boolean(modalOpen)); cursor.classList.add('visible'); lastX = event.clientX; lastY = event.clientY; lastTime = now; }); document.addEventListener('pointerover', event => { if (event.target.closest('button, input, select, textarea, a, [role="button"]')) cursor.classList.add('hover'); }); document.addEventListener('pointerout', event => { if (!event.relatedTarget || !event.relatedTarget.closest || !event.relatedTarget.closest('button, input, select, textarea, a, [role="button"]')) cursor.classList.remove('hover'); }); document.addEventListener('pointerleave', () => cursor.classList.remove('visible')); }
+    function openEvaluationEditor() { const evaluation = currentEvaluation(); if (evaluation.locked) return toast('Desbloquea la evaluación para editarla'); $('evaluationModalTitle').textContent = 'Editar evaluación'; $('evaluationModalIntro').textContent = 'Cambia el nombre, la fecha o marca la evaluación como completada.'; $('newEvalName').value = evaluation.name; $('newEvalEnd').value = evaluation.endDate; $('evaluationCompleted').checked = false; $('evaluationCompleted').disabled = false; $('evaluationForm').dataset.editingId = evaluation.id; $('saveEvaluationBtn').textContent = 'Guardar cambios'; openModal('evaluationModal'); }
+
+    $('setupForm').addEventListener('submit', e => { e.preventDefault(); const evalId = uid('eval-'); state = { name: $('setupName').value.trim(), language: 'es', currentEvaluationId: evalId, evaluations: [{ id: evalId, name: $('setupEvalName').value.trim(), endDate: $('setupEndDate').value, locked: false }], subjects: [], tourSeen: true, guidedStep: 'subject' }; save(); closeModal('setupModal'); render(); startGuidedStep(); });
+    $('profileBtn').onclick = () => $('profileWrap').classList.toggle('open');
+    $('languageSelect').onchange = event => { state.language = event.target.value; save(); render(); toast(event.target.value === 'en' ? 'Language updated' : event.target.value === 'eu' ? 'Hizkuntza eguneratu da' : 'Idioma actualizado'); };
+    $('openLanguageFromProfile').onclick = () => { $('profileWrap').classList.remove('open'); openProfileModal(); };
+    $('openDeleteFromPopover').onclick = () => { $('profileWrap').classList.remove('open'); openDeleteModal(); };
+    document.addEventListener('click', event => { if (!event.target.closest('#profileWrap')) $('profileWrap').classList.remove('open'); });
+    $('averagesBtn').onclick = () => { if (state.guidedStep === 'averagesButton') { state.guidedStep = 'finishView'; save(); clearGuidedFocus(); setView('averages'); focusGuidedTarget('#averagesSection'); scheduleGuidedStep('finishView'); return; } setView(currentView === 'averages' ? 'subjects' : 'averages'); };
+    $('addSubjectBtn').onclick = () => { if (state.guidedStep === 'subjectButton') { state.guidedStep = 'subjectForm'; save(); clearGuidedFocus(); } openSubject(); };
+    $('deleteSubjectBtn').onclick = () => { const subjectId = $('editingSubjectId').value; if (!subjectId || !window.confirm('¿Eliminar esta asignatura de todas las evaluaciones?')) return; state.subjects = state.subjects.filter(subject => subject.id !== subjectId); save(); closeModal('subjectModal'); render(); toast('Asignatura eliminada'); };
+    $('addComponentBtn').onclick = () => $('componentEditor').appendChild(componentRow());
+    $('evaluationSelect').onchange = e => { state.currentEvaluationId = e.target.value; save(); render(); };
+    $('editEvaluationBtn').onclick = () => { if (state.guidedStep === 'configButton') { state.guidedStep = 'configOpen'; save(); clearGuidedFocus(); } openEvaluationEditor(); };
+    $('newEvaluationBtn').onclick = () => { $('evaluationModalTitle').textContent = 'Nueva evaluación'; $('evaluationModalIntro').textContent = 'Las asignaturas se mantienen, pero sus partes y notas empiezan en blanco.'; $('newEvalEnd').value = ''; $('newEvalName').value = `${state.evaluations.length + 1}ª evaluación`; $('evaluationCompleted').checked = false; $('evaluationCompleted').disabled = false; $('evaluationForm').dataset.editingId = ''; $('saveEvaluationBtn').textContent = 'Crear evaluación'; openModal('evaluationModal'); };
+    $('copyEvaluationBtn').onclick = () => { if (currentEvaluation().locked) return toast('Desbloquea la evaluación para editarla'); const index = state.evaluations.findIndex(e => e.id === state.currentEvaluationId); const previous = state.evaluations[index - 1]; if (!previous) return toast('No hay una evaluación anterior'); state.subjects.forEach(s => { const old = s.evaluations[previous.id]; if (old) s.evaluations[state.currentEvaluationId] = { components: old.components.map(c => ({ ...c, id: uid('component-'), grade: null })) }; }); save(); render(); toast('Configuración anterior copiada'); };
+    $('subjectForm').addEventListener('submit', e => { e.preventDefault(); if (currentEvaluation().locked) { closeModal('subjectModal'); return toast('Desbloquea la evaluación para editar asignaturas'); } const name = $('subjectName').value.trim(); const rows = [...$('componentEditor').querySelectorAll('.component-editor')]; const components = rows.map(row => ({ id: uid('component-'), name: row.querySelector('.component-name-input').value.trim(), weight: Number(row.querySelector('.component-weight-input').value), grade: null })).filter(c => c.name && c.weight >= 0); const sum = components.reduce((total, c) => total + c.weight, 0); if (sum !== 100) return toast(`Los porcentajes deben sumar 100% (ahora: ${sum}%)`); const id = $('editingSubjectId').value; if (id) { const subject = findSubject(id); subject.name = name; subject.nonComputable = $('nonComputable').checked; subject.evaluations[state.currentEvaluationId] = { components }; } else { state.subjects.push({ id: uid('subject-'), name, nonComputable: $('nonComputable').checked, evaluations: { [state.currentEvaluationId]: { components } } }); } save(); closeModal('subjectModal'); render(); toast('Asignatura guardada'); if (state.guidedStep === 'subjectForm') { state.guidedStep = 'grade'; save(); startGuidedStep(); } });
+    $('evaluationForm').addEventListener('submit', e => { e.preventDefault(); const name = $('newEvalName').value.trim(); const endDate = $('newEvalEnd').value; const completed = $('evaluationCompleted').checked; const editingId = e.currentTarget.dataset.editingId; if (editingId) { const evaluation = state.evaluations.find(item => item.id === editingId); evaluation.name = name; evaluation.endDate = endDate; evaluation.locked = completed; save(); closeModal('evaluationModal'); render(); toast(completed ? 'Evaluación completada y bloqueada' : 'Evaluación actualizada'); return; } const id = uid('eval-'); state.evaluations.push({ id, name, endDate, locked: completed }); state.subjects.forEach(s => s.evaluations[id] = { components: [] }); state.currentEvaluationId = id; save(); closeModal('evaluationModal'); render(); toast(completed ? 'Evaluación creada y bloqueada' : 'Nueva evaluación creada'); });
+    $('confirmCloseBtn').onclick = () => { currentEvaluation().locked = true; save(); closeModal('closeModal'); render(); toast('Evaluación cerrada y protegida'); };
+    $('tourNext').onclick = () => { if (tourStep === tourSteps.length - 1) finishTour(); else { tourStep++; updateTour(); } };
+    $('tourBack').onclick = () => { if (tourStep > 0) { tourStep--; updateTour(); } };
+    $('tourSkip').onclick = () => finishTour();
+    $('guidedAction').onclick = () => handleGuidedAction();
+    $('keepGuidedData').onclick = () => { state.guidedStep = null; state.tourSeen = true; save(); clearGuidedFocus(); closeModal('guidedFinishModal'); currentView = 'subjects'; render(); toast('Demostración conservada'); };
+    $('clearGuidedData').onclick = () => { state.subjects = []; state.guidedStep = null; state.tourSeen = true; save(); clearGuidedFocus(); closeModal('guidedFinishModal'); currentView = 'subjects'; render(); toast('Panel listo para empezar'); };
+    $('deleteForm').addEventListener('submit', e => { e.preventDefault(); if (!$('deleteConfirm').checked || $('deletePhrase').value !== 'BORRAR TODO') return; localStorage.removeItem(STORE); window.location.reload(); });
+    document.querySelectorAll('[data-close]').forEach(button => button.addEventListener('click', () => closeModal(button.dataset.close)));
+    document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.addEventListener('click', e => { if (e.target === backdrop && backdrop.id !== 'setupModal' && backdrop.id !== 'tourModal') closeModal(backdrop.id); }));
+    initCustomCursor();
+
+    if (!state) { startTour('intro'); } else { render(); if (!state.tourSeen) startTour('app'); else if (state.guidedStep) startGuidedStep(); }
+  </script>
+</body>
+</html>
